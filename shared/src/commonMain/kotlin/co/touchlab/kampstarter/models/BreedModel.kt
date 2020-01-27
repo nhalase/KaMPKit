@@ -68,6 +68,7 @@ class BreedModel(private val viewUpdate: (ItemDataSummary) -> Unit) : BaseModel(
         mainScope.launch {
             dbHelper.updateFavorite(breed.id, breed.favorite != 1L)
         }
+        throw IllegalStateException("Testing crashy")
     }
 }
 
