@@ -8,7 +8,7 @@ import org.koin.dsl.module
 
 object TestingServiceRegistry {
 
-    internal fun appStart(helper: DatabaseHelper, settings: Settings, ktorApi: KtorApi){
+    internal fun appStart(helper: DatabaseHelper, settings: Settings, ktorApi: KtorApi) {
         val coreModule = module {
             single { helper }
             single { settings }
@@ -16,10 +16,9 @@ object TestingServiceRegistry {
         }
 
         startKoin { modules(coreModule) }
-
     }
 
-    internal fun appEnd(){
+    internal fun appEnd() {
         stopKoin()
     }
 }

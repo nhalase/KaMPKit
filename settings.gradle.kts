@@ -1,3 +1,4 @@
-include(":app", ":shared")
 rootProject.name = "KaMP Starter"
-enableFeaturePreview("GRADLE_METADATA")
+
+include(":app")
+include(":shared")

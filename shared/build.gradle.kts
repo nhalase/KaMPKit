@@ -1,4 +1,3 @@
-
 plugins {
     kotlin("multiplatform")
     kotlin("native.cocoapods")
@@ -6,6 +5,8 @@ plugins {
     id("com.android.library")
     id("com.squareup.sqldelight")
     id("co.touchlab.kotlinxcodesync")
+    id("org.jmailen.kotlinter")
+    id("de.mannodermaus.android-junit5")
 }
 
 android {
@@ -16,36 +17,45 @@ android {
         versionCode = 1
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunnerArgument("runnerBuilder", "de.mannodermaus.junit5.AndroidJUnit5Builder")
+    }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+    // JUnit 5 will bundle in files with identical paths; exclude them
+    packagingOptions {
+        exclude("META-INF/LICENSE*")
     }
 }
 
 kotlin {
     android()
     //Revert to just ios() when gradle plugin can properly resolve it
-    val onPhone = System.getenv("SDK_NAME")?.startsWith("iphoneos")?:false
-    if(onPhone){
+    val onPhone = System.getenv("SDK_NAME")?.startsWith("iphoneos") ?: false
+    if (onPhone) {
         iosArm64("ios")
-    }else{
+    } else {
         iosX64("ios")
     }
 
     version = "1.0"
 
     sourceSets["commonMain"].dependencies {
-        implementation(kotlin("stdlib-common", Versions.kotlin))
+        implementation(kotlin("stdlib-common", Versions.kotlin_version))
         implementation(Deps.SqlDelight.runtime)
-        implementation(Deps.ktor.commonCore)
-        implementation(Deps.ktor.commonJson)
+        implementation(Deps.Ktor.common_core)
+        implementation(Deps.Ktor.common_json)
         implementation(Deps.Coroutines.common)
         implementation(Deps.stately)
-        implementation(Deps.multiplatformSettings)
-        implementation(Deps.koinCore)
-        implementation(Deps.ktor.commonSerialization)
+        implementation(Deps.multiplatform_settings)
+        implementation(Deps.koin_core)
+        implementation(Deps.Ktor.common_serialization)
 
     }
 
     sourceSets["commonTest"].dependencies {
-        implementation(Deps.multiplatformSettingsTest)
+        implementation(Deps.multiplatform_settings_test)
         implementation(Deps.SqlDelight.runtime)
         implementation(Deps.KotlinTest.common)
         implementation(Deps.KotlinTest.annotations)
@@ -55,33 +65,35 @@ kotlin {
     }
 
     sourceSets["androidMain"].dependencies {
-        implementation(kotlin("stdlib", Versions.kotlin))
-        implementation(Deps.SqlDelight.driverAndroid)
-        implementation(Deps.ktor.jvmCore)
-        implementation(Deps.ktor.jvmJson)
+        implementation(kotlin("stdlib", Versions.kotlin_version))
+        implementation(Deps.SqlDelight.driver_android)
+        implementation(Deps.Ktor.jvm_core)
+        implementation(Deps.Ktor.jvm_json)
         implementation(Deps.Coroutines.jdk)
         implementation(Deps.Coroutines.android)
-        implementation(Deps.ktor.androidSerialization)
+        implementation(Deps.Ktor.android_serialization)
     }
 
     sourceSets["androidTest"].dependencies {
-        implementation(Deps.KotlinTest.jvm)
-        implementation(Deps.KotlinTest.junit)
-        implementation(Deps.Coroutines.jdk)
-        implementation(Deps.AndroidXTest.core)
-        implementation(Deps.AndroidXTest.junit)
         implementation(Deps.AndroidXTest.runner)
-        implementation(Deps.AndroidXTest.rules)
+        implementation(Deps.AndroidXTest.junit)
+        implementation(Deps.junit_jupiter_api)
+        implementation(Deps.AndroidXTest.core_junit5)
+        implementation(Deps.KotlinTest.junit)
+        implementation(Deps.KotlinTest.annotations)
+        implementation(Deps.KotlinTest.reflect)
+        runtimeOnly(Deps.junit_vintage_engine)
+        runtimeOnly(Deps.AndroidXTest.runner_junit5)
         implementation("org.robolectric:robolectric:4.0")
     }
 
     sourceSets["iosMain"].dependencies {
-        implementation(Deps.SqlDelight.driverIos)
-        implementation(Deps.ktor.ios, Deps.coroutinesExcludeNative)
-        implementation(Deps.ktor.iosCore, Deps.coroutinesExcludeNative)
-        implementation(Deps.ktor.iosJson, Deps.coroutinesExcludeNative)
+        implementation(Deps.SqlDelight.driver_ios)
+        implementation(Deps.Ktor.ios, Deps.coroutinesExcludeNative)
+        implementation(Deps.Ktor.ios_core, Deps.coroutinesExcludeNative)
+        implementation(Deps.Ktor.ios_json, Deps.coroutinesExcludeNative)
         implementation(Deps.Coroutines.native)
-        implementation(Deps.ktor.iosSerialization)
+        implementation(Deps.Ktor.ios_serialization)
     }
 
     cocoapods {
@@ -108,9 +120,12 @@ val iOSTest: Task by tasks.creating {
     description = "Runs tests for target 'ios' on an iOS simulator"
 
     doLast {
-        val binary = kotlin.targets.getByName<org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget>("ios").binaries.getTest("DEBUG").outputFile
+        val binary =
+            kotlin.targets.getByName<org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget>("ios").binaries.getTest(
+                "DEBUG"
+            ).outputFile
         exec {
-            commandLine("xcrun", "simctl", "spawn", "--standalone",device, binary.absolutePath)
+            commandLine("xcrun", "simctl", "spawn", "--standalone", device, binary.absolutePath)
         }
     }
 }

@@ -1,25 +1,6 @@
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
-
-buildscript {
-
-    repositories {
-        google()
-        jcenter()
-    }
-    dependencies {
-        classpath(Deps.android_gradle_plugin)
-        classpath(Deps.SqlDelight.gradle)
-        classpath(Deps.xcodesync)
-        classpath("org.jetbrains.kotlin:kotlin-serialization:${Versions.kotlin}")
-
-        classpath(kotlin("gradle-plugin", Versions.kotlin))
-        // NOTE: Do not place your application dependencies here; they belong
-        // in the individual module build gradle files
-    }
-}
-
 allprojects {
     repositories {
+        mavenLocal()
         google()
         jcenter()
         maven(url = "https://kotlin.bintray.com/kotlinx")
@@ -28,5 +9,13 @@ allprojects {
 }
 
 tasks.register("clean", Delete::class) {
+    group = "build"
+    description = "cleans every project buildDir"
+    delete(buildDir)
+}
+
+tasks.register("cleanRootOnly", Delete::class) {
+    group = "build"
+    description = "cleans only the rootProject buildDir"
     delete(rootProject.buildDir)
 }

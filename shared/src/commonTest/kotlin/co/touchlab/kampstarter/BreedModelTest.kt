@@ -4,27 +4,32 @@ import co.touchlab.kampstarter.ktor.KtorApi
 import co.touchlab.kampstarter.models.BreedModel
 import co.touchlab.kampstarter.response.BreedResult
 import com.russhwolf.settings.MockSettings
-import kotlin.test.*
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
+@ExperimentalCoroutinesApi
 abstract class BreedModelTest {
 
-    private lateinit var model:BreedModel
+    private lateinit var model: BreedModel
     private var dbHelper = DatabaseHelper(testDbConnection())
     private val settings = MockSettings()
     private val ktorApi = KtorApiMock()
 
     @BeforeTest
-    fun setup(){
-        TestingServiceRegistry.appStart(dbHelper,settings,ktorApi)
+    fun setup() {
+        TestingServiceRegistry.appStart(dbHelper, settings, ktorApi)
 
-        model = BreedModel{
-
+        model = BreedModel {
         }
     }
 
     @Test
     fun `Get Breed List Failure`() = runTest {
-        settings.putLong(BreedModel.DB_TIMESTAMP_KEY,currentTimeMillis())
+        settings.putLong(BreedModel.DB_TIMESTAMP_KEY, currentTimeMillis())
         assertFalse(ktorApi.jsonRequested)
         model.getBreedsFromNetwork()
         assertFalse(ktorApi.jsonRequested)
@@ -40,7 +45,7 @@ abstract class BreedModelTest {
     }
 
     @AfterTest
-    fun breakdown(){
+    fun breakdown() {
         TestingServiceRegistry.appEnd()
     }
 }
@@ -50,9 +55,9 @@ class KtorApiMock : KtorApi {
 
     override suspend fun getJsonFromApi(): BreedResult {
         jsonRequested = true
-        val map = mutableMapOf<String,List<String>>()
+        val map = mutableMapOf<String, List<String>>()
         map["appenzeller"] = listOf()
         map["australian"] = listOf("shepherd")
-        return BreedResult(map as HashMap<String, List<String>>,"success")
+        return BreedResult(map as HashMap<String, List<String>>, "success")
     }
 }
